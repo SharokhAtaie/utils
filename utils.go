@@ -48,7 +48,7 @@ func DnsxResolver(Subdomain string) []string {
 	return result
 }
 
-func PureResolver(Domains []string) []string {
+func PureResolver(Domains []string, MaxConcurrency int) []string {
 	resolvers := []string{
 		"8.8.8.8",
 		"8.8.4.4",
@@ -56,7 +56,7 @@ func PureResolver(Domains []string) []string {
 		"1.1.1.1",
 	}
 
-	client := resolvermt.New(resolvers, 3, 10, 5)
+	client := resolvermt.New(resolvers, 3, 100, MaxConcurrency)
 	defer client.Close()
 
 	results := client.Resolve(Domains, resolvermt.TypeA)
