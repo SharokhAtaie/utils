@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"github.com/d3mondev/resolvermt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/projectdiscovery/dnsx/libs/dnsx"
 	"go.mongodb.org/mongo-driver/bson"
@@ -45,6 +46,29 @@ func DnsxResolver(Subdomain string) []string {
 	result, _ := dnsClient.Lookup(Subdomain)
 
 	return result
+}
+
+func PureResolver(Domains []string) []string {
+	resolvers := []string{
+		"8.8.8.8",
+		"8.8.4.4",
+		"9.9.9.10",
+		"1.1.1.1",
+	}
+
+	client := resolvermt.New(resolvers, 3, 10, 5)
+	defer client.Close()
+
+	results := client.Resolve(Domains, resolvermt.TypeA)
+
+	var resolved []string
+
+	for _, record := range results {
+		if record.Answer != "" {
+			resolved = append(resolved, record.Question)
+		}
+	}
+	return resolved
 }
 
 func GetDomainsFromDB(client *mongo.Client) []string {
