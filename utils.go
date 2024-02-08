@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"time"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ type Data struct {
 	Subdomain string   `json:"subdomain"`
 	Source    []string `json:"source"`
 	IPs       []string `json:"ips"`
-	Date      string   `json:"date"`
+	Date      time.Time   `json:"date"`
 }
 
 type Request struct {
@@ -119,31 +120,6 @@ func GetSubsFromDB(client *mongo.Client, DbName, Domain string) []string {
 	}
 
 	return AllSubs
-}
-
-func GetDataFromDB(client *mongo.Client, DbName, Collection string) Data {
-
-	filter := bson.D{}
-
-	// Get a handle to the collection
-	cursur, err := client.Database(DbName).Collection(Collection).Find(context.Background(), filter)
-	if err != nil {
-		panic(err)
-	}
-
-	defer cursur.Close(context.Background())
-
-	for cursur.Next(context.Background()) {
-		var data Data
-		err = cursur.Decode(&data)
-		if err != nil {
-			panic(err)
-		}
-
-		return data
-	}
-
-	return Data{}
 }
 
 func FormatList(items []string) string {
